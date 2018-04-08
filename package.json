@@ -1,0 +1,23 @@
+{
+  "name": "satdatavis",
+  "version": "1.0.0",
+  "description": "explore visualizing satellite project data",
+  "main": "index.js",
+  "dependencies": {
+    "three": "^0.91.0"
+  },
+  "devDependencies": {},
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/SuddenDevelopment/satdatavis.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/SuddenDevelopment/satdatavis/issues"
+  },
+  "homepage": "https://github.com/SuddenDevelopment/satdatavis#readme"
+}
