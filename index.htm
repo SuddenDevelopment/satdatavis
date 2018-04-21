@@ -4,14 +4,32 @@
 		<meta charset=utf-8>
 		<title>Satellite Data</title>
 		<style>
-			body { margin: 0; overflow:hidden; }
+			body { margin: 0; overflow:hidden; color:#aaa;}
 			canvas { width: 100%; height: 100% }
-			#head { position:absolute; z-index: 10; top:0; }
+			#sparklines { position:absolute; z-index: 10; left:5; top:5px;}
 		</style>
+		<script src=//unpkg.com/vue></script>
+		<script src=//unpkg.com/vuetrend></script>
 	</head>
 	<body>
-		<div id="head">
-				<input type="file" id="csv-file" name="files"/>
+		<div id="sparklines" >
+		  <input type="file" id="csv-file" name="files" @change="fnLoadFile" />
+		  <!--  https://github.com/QingWei-Li/vue-trend  -->
+		  	<div v-if="intRecords > 0">
+		  		<div> {{intRecords}} Seconds</div>
+			  	<div v-for="objSensor in objConfig">
+				  {{objSensor.label}}
+				  <trend
+				    :data=objSensor.values
+				    :gradient="['#000', '#f0f', '#00f', '#ff0', '#f00']"
+				    :min=intMin
+				    :max=intMax
+				    auto-draw
+				    >
+				  </trend>
+				  {{objSensor.values[objSensor.values.length-1]}}
+				</div>
+			</div>
 		</div>
 		<script src="./node_modules/papaparse/papaparse.min.js"></script>
 		<script src="./node_modules/three/build/three.min.js"></script>

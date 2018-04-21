@@ -227,18 +227,77 @@ var fnAddData=function(objData){
 //load and parse the data from the chosen file
 document.getElementById('csv-file').addEventListener('change', function(objEvent){
     //console.log('submit',objEvent);
-    Papa.parse(objEvent.target.files[0], {
-        "header": true,
-        "complete": function(objResults) {
-            //console.log(results);
-            //file loaded, start the stream, 1 per second
-            arrData=objResults.data;
-            var intCount=arrData.length; var i=0;
-            var objInterval=setInterval(function(){ 
-                if(i<intCount){ fnAddData(arrData[i]); i++;}
-                else{ clearInterval(objInterval); }
-            }, 1000);
-            // clearInterval(objInterval);
-        }
-    });
+    
 }, false);
+
+new Vue({ 
+    "el": '#sparklines',
+    data(){
+        return {
+            "intMin":100, "intMax":100, "intRecords":0,
+            "objConfig":{
+                "T11_CNV_LF":{ "label":"Temp Left" , "values":[], "model":objFrontSensor },
+                "T12_CNV_FR":{ "label":"Temp Right" , "values":[], "model":objLeftSensor }
+            }
+        }
+    },
+    created(){},
+    "methods":{
+        fnUpdateColor(strId,intValue){
+            /*
+        - BLACK: <70F
+        - PURPLE: 70-80
+        - BLUE: 80-90
+        - PALE YELLOW: 90-95
+        - YELLOW: 95-100
+        - BRIGHT YELLOW: 100-105
+        - ORANGE: 110-115
+        - RED: >115F
+            */
+            var self=this;
+            var hexColor=0x222222;
+            if(intValue > 70){ hexColor=0xff22ff; }
+            if(intValue > 80){ hexColor=0x2222ff; }
+            if(intValue > 90){ hexColor=0x666622; }
+            if(intValue > 95){ hexColor=0xffff22; }
+            if(intValue > 110){ hexColor=0xffa522; }
+            if(intValue > 115){ hexColor=0xff2222; }
+            self.objConfig[strId].model.material.color = new THREE.Color(hexColor);
+        }
+        ,fnAddData(objData){
+            var self=this;
+            var arrKeys = Object.keys(objData);
+            //separate each value into its own little array for a chart
+            for( var i=0;i<arrKeys.length;i++ ){
+                if(typeof self.objConfig[arrKeys[i]] !== 'undefined'){ 
+                    var intValue = parseInt(objData[arrKeys[i]]);
+                    //adjust ranges
+                    if(intValue > self.intMax){ self.intMax=intValue; }
+                    else if(intValue < self.intMin){ self.intMin=intValue; }
+                    //add data to charts
+                    self.objConfig[arrKeys[i]].values.push(parseInt(objData[arrKeys[i]]));
+                    //set color 
+                    self.fnUpdateColor(arrKeys[i],intValue);
+                    //update record count
+                    self.intRecords++;
+                }
+                //console.log(objData[arrKeys[i]],parseInt(objData[arrKeys[i]]));
+            }
+        },fnLoadFile(objEvent){
+            var self=this;
+            Papa.parse(objEvent.target.files[0], {
+                "header": true,
+                "complete": function(objResults) {
+                    //console.log(objResults);
+                    //file loaded, start the stream, 1 per second
+                    var arrData=objResults.data;
+                    var intCount=arrData.length; var i=0;
+                    var objInterval=setInterval(function(){ 
+                        if(i<intCount){ self.fnAddData(arrData[i]); i++;}
+                        else{ clearInterval(objInterval); }
+                    }, 1000);
+                }
+            });
+        }
+    }
+});
