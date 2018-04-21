@@ -1,7 +1,6 @@
 // The dimensions are: 2.5" H x 3.25" Deep x 3.75" W
 // 63.5, 82.55, 95.25
 
-
 var container, stats ,objFan1,objFan2;
 
             var camera, cameraTarget, scene, renderer;
@@ -59,12 +58,9 @@ var container, stats ,objFan1,objFan2;
 
                     objFan2 = new THREE.Mesh( geometry, meshMaterial );
 
-                    objFan2.position.set( 0.325, 0.55, -0.25 );
+                    objFan2.position.set( -0.3, 1, -0.3 );
                     objFan2.rotation.set( 0, Math.PI / 2, 0 );
                     objFan2.scale.set( 0.01, 0.01, 0.01 );
-
-                    objFan2.castShadow = true;
-                    objFan2.receiveShadow = true;
 
                     scene.add( objFan2 );
 
@@ -78,20 +74,74 @@ var container, stats ,objFan1,objFan2;
 
                     objFan1 = new THREE.Mesh( geometry, meshMaterial );
 
-                    objFan1.position.set( 0.325, 0.75, 0.25 );
+                    objFan1.position.set( 0.15, 1, 0.25 );
                     objFan1.rotation.set( 0, Math.PI / 2, 0 );
                     objFan1.scale.set( 0.01, 0.01, 0.01 );
-
-                    objFan1.castShadow = true;
-                    objFan1.receiveShadow = true;
 
                     scene.add( objFan1 );
 
                 } );
 
+                loader.load( './models/resistor2.stl', function ( geometry ) {
+
+                    var meshMaterial = new THREE.MeshPhongMaterial( { color: 0xAA6666, specular: 0x111111, shininess: 200 } );
+
+                    objRes2 = new THREE.Mesh( geometry, meshMaterial );
+
+                    objRes2.position.set( 0, 0.6, -0.15 );
+                    objRes2.rotation.set( 0, Math.PI / 4, Math.PI / 2 );
+                    objRes2.scale.set( 0.01, 0.01, 0.01 );
+
+                    scene.add( objRes2 );
+
+                } );
+
+                loader.load( './models/resistor1.stl', function ( geometry ) {
+
+                    var meshMaterial = new THREE.MeshPhongMaterial( { color: 0xAA6666, specular: 0x111111, shininess: 200 } );
+
+                    objRes1 = new THREE.Mesh( geometry, meshMaterial );
+
+                    objRes1.position.set( -0.1, 0.8, 0.45 );
+                    objRes1.rotation.set( -Math.PI / 2, 0, Math.PI / 2 );
+                    objRes1.scale.set( 0.01, 0.01, 0.01 );
+
+                    scene.add( objRes1 );
+
+                } );
+
+                //sensors
+                var geometry = new THREE.BoxBufferGeometry( 0.05, 0.025, 0.05 );
+                var objSensorMaterial = new THREE.MeshPhongMaterial( { color: 0x66AA66, specular: 0x111111, shininess: 200 } );
+                objTopSensor = new THREE.Mesh( geometry, objSensorMaterial );
+                objTopSensor.position.set( -0.05, 0.95, -0.05 );
+                scene.add( objTopSensor );
+
+                objBotSensor = new THREE.Mesh( geometry, objSensorMaterial );
+                objBotSensor.position.set( -0.05, 0.35, -0.05 );
+                scene.add( objBotSensor );
+
+                objLeftSensor = new THREE.Mesh( geometry, objSensorMaterial );
+                objLeftSensor.rotation.set(0,0,Math.PI/2);
+                objLeftSensor.position.set( -0.45, 0.65, -0.05 );
+                scene.add( objLeftSensor );
+
+                objRightSensor = new THREE.Mesh( geometry, objSensorMaterial );
+                objRightSensor.rotation.set(0,0,Math.PI/2);
+                objRightSensor.position.set( 0.3, 0.65, -0.05 );
+                scene.add( objRightSensor );
+
+                objFrontSensor = new THREE.Mesh( geometry, objSensorMaterial );
+                objFrontSensor.rotation.set(Math.PI/2,0,0);
+                objFrontSensor.position.set( -0.05, 0.65, -0.45 );
+                scene.add( objFrontSensor );
+
+                objBackSensor = new THREE.Mesh( geometry, objSensorMaterial );
+                objBackSensor.rotation.set(Math.PI/2,0,0);
+                objBackSensor.position.set( -0.05, 0.65, 0.4 );
+                scene.add( objBackSensor );
+
                 // Lights
-
-
 var bulbGeometry = new THREE.SphereGeometry( 0.02, 16, 8 );
                 bulbLight = new THREE.PointLight( 0xffee88, 1, 100, 2 );
                 bulbMat = new THREE.MeshStandardMaterial( {
@@ -156,8 +206,8 @@ var bulbGeometry = new THREE.SphereGeometry( 0.02, 16, 8 );
             function render() {
 
                 var timer = Date.now() * 0.0005;
-                if(objFan1){ objFan1.rotation.set( 0, - Math.PI / 2, Math.cos( timer ) * 30 ); }
-                if(objFan2){ objFan2.rotation.set( 0, - Math.PI / 2, Math.cos( timer ) * 30 ); }
+                if(objFan1){ objFan1.rotation.set( Math.PI/2, 0, objFan1.rotation.z+=1 ); }
+                if(objFan2){ objFan2.rotation.set( Math.PI/2, 0, objFan2.rotation.z-=1); }
                 
 
                 camera.position.x = Math.cos( timer ) * 3;

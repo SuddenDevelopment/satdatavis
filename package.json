@@ -4,6 +4,7 @@
   "description": "explore visualizing satellite project data",
   "main": "index.js",
   "dependencies": {
+    "papaparse": "^4.3.7",
     "three": "^0.91.0"
   },
   "devDependencies": {},
