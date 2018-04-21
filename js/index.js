@@ -111,31 +111,31 @@ var container, stats ,objFan1,objFan2,arrData;
 
                 //sensors
                 var geometry = new THREE.BoxBufferGeometry( 0.05, 0.025, 0.05 );
-                var objSensorMaterial = new THREE.MeshPhongMaterial( { color: 0x66AA66, specular: 0x111111, shininess: 200 } );
-                objTopSensor = new THREE.Mesh( geometry, objSensorMaterial );
+                //var objSensorMaterial = new THREE.MeshPhongMaterial( { color: 0x66AA66, specular: 0x111111, shininess: 200 } );
+                objTopSensor = new THREE.Mesh( geometry, new THREE.MeshPhongMaterial( { color: 0x66AA66, specular: 0x111111, shininess: 200 } ) );
                 objTopSensor.position.set( -0.05, 0.95, -0.05 );
                 scene.add( objTopSensor );
 
-                objBotSensor = new THREE.Mesh( geometry, objSensorMaterial );
+                objBotSensor = new THREE.Mesh( geometry, new THREE.MeshPhongMaterial( { color: 0x66AA66, specular: 0x111111, shininess: 200 } ) );
                 objBotSensor.position.set( -0.05, 0.35, -0.05 );
                 scene.add( objBotSensor );
 
-                objLeftSensor = new THREE.Mesh( geometry, objSensorMaterial );
+                objLeftSensor = new THREE.Mesh( geometry, new THREE.MeshPhongMaterial( { color: 0x66AA66, specular: 0x111111, shininess: 200 } ) );
                 objLeftSensor.rotation.set(0,0,Math.PI/2);
                 objLeftSensor.position.set( -0.45, 0.65, -0.05 );
                 scene.add( objLeftSensor );
 
-                objRightSensor = new THREE.Mesh( geometry, objSensorMaterial );
+                objRightSensor = new THREE.Mesh( geometry, new THREE.MeshPhongMaterial( { color: 0x66AA66, specular: 0x111111, shininess: 200 } ) );
                 objRightSensor.rotation.set(0,0,Math.PI/2);
                 objRightSensor.position.set( 0.3, 0.65, -0.05 );
                 scene.add( objRightSensor );
 
-                objFrontSensor = new THREE.Mesh( geometry, objSensorMaterial );
+                objFrontSensor = new THREE.Mesh( geometry, new THREE.MeshPhongMaterial( { color: 0x66AA66, specular: 0x111111, shininess: 200 } ) );
                 objFrontSensor.rotation.set(Math.PI/2,0,0);
                 objFrontSensor.position.set( -0.05, 0.65, -0.45 );
                 scene.add( objFrontSensor );
 
-                objBackSensor = new THREE.Mesh( geometry, objSensorMaterial );
+                objBackSensor = new THREE.Mesh( geometry, new THREE.MeshPhongMaterial( { color: 0x66AA66, specular: 0x111111, shininess: 200 } ) );
                 objBackSensor.rotation.set(Math.PI/2,0,0);
                 objBackSensor.position.set( -0.05, 0.65, 0.4 );
                 scene.add( objBackSensor );
@@ -220,6 +220,8 @@ var bulbGeometry = new THREE.SphereGeometry( 0.02, 16, 8 );
 
 var fnAddData=function(objData){
     console.log(objData);
+    if(objData.T11_CNV_LF > 100){ objLeftSensor.material.color = new THREE.Color(0xFF3333); }
+    if(objData.T11_CNV_LF < 100){ objLeftSensor.material.color = new THREE.Color(0x333333); }
 };
 
 //load and parse the data from the chosen file
