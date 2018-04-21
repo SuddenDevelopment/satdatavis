@@ -1,7 +1,6 @@
 // The dimensions are: 2.5" H x 3.25" Deep x 3.75" W
 // 63.5, 82.55, 95.25
-
-var container, stats ,objFan1,objFan2;
+var container, stats ,objFan1,objFan2,arrData;
 
             var camera, cameraTarget, scene, renderer;
 
@@ -218,3 +217,26 @@ var bulbGeometry = new THREE.SphereGeometry( 0.02, 16, 8 );
                 renderer.render( scene, camera );
 
             }
+
+var fnAddData=function(objData){
+    console.log(objData);
+};
+
+//load and parse the data from the chosen file
+document.getElementById('csv-file').addEventListener('change', function(objEvent){
+    //console.log('submit',objEvent);
+    Papa.parse(objEvent.target.files[0], {
+        "header": true,
+        "complete": function(objResults) {
+            //console.log(results);
+            //file loaded, start the stream, 1 per second
+            arrData=objResults.data;
+            var intCount=arrData.length; var i=0;
+            var objInterval=setInterval(function(){ 
+                if(i<intCount){ fnAddData(arrData[i]); i++;}
+                else{ clearInterval(objInterval); }
+            }, 1000);
+            // clearInterval(objInterval);
+        }
+    });
+}, false);
