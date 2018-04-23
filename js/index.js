@@ -1,8 +1,8 @@
 // The dimensions are: 2.5" H x 3.25" Deep x 3.75" W
 // 63.5, 82.55, 95.25
-var container, stats ,objFan1,objFan2,arrData;
+var container, stats ,objFan1,objFan2,arrData,objStream;
 
-            var camera, cameraTarget, scene, renderer;
+            var camera, cameraTarget, scene, renderer,controls;
 
             init();
             animate();
@@ -16,7 +16,7 @@ var container, stats ,objFan1,objFan2,arrData;
                 camera.position.set( 0, 2, 2 );
 
                 cameraTarget = new THREE.Vector3( 0, 0.5, 0 );
-
+                controls = new THREE.OrbitControls( camera );
                 scene = new THREE.Scene();
                 //scene.background = new THREE.Color( 0x72645b );
                 //scene.fog = new THREE.Fog( 0x72645b, 2, 15 );
@@ -196,7 +196,7 @@ var bulbGeometry = new THREE.SphereGeometry( 0.02, 16, 8 );
             function animate() {
 
                 requestAnimationFrame( animate );
-
+                controls.update();
                 render();
                 //stats.update();
 
@@ -209,9 +209,8 @@ var bulbGeometry = new THREE.SphereGeometry( 0.02, 16, 8 );
                 if(objFan2){ objFan2.rotation.set( Math.PI/2, 0, objFan2.rotation.z-=1); }
                 
 
-                camera.position.x = Math.cos( timer ) * 3;
-                camera.position.z = Math.sin( timer ) * 3;
-
+                //camera.position.x = Math.cos( timer ) * 3;
+                //camera.position.z = Math.sin( timer ) * 3;
                 camera.lookAt( cameraTarget );
 
                 renderer.render( scene, camera );
@@ -224,25 +223,39 @@ var fnAddData=function(objData){
     if(objData.T11_CNV_LF < 100){ objLeftSensor.material.color = new THREE.Color(0x333333); }
 };
 
-//load and parse the data from the chosen file
-document.getElementById('csv-file').addEventListener('change', function(objEvent){
-    //console.log('submit',objEvent);
-    
-}, false);
-
+// https://www.chartkick.com/vue
+Vue.use(VueChartkick, {adapter: Chart})
 new Vue({ 
     "el": '#sparklines',
     data(){
         return {
-            "intMin":100, "intMax":100, "intRecords":0,
+            "intMin":90, "intMax":100, "intRecords":0, "objChartData":[],
             "objConfig":{
-                "T11_CNV_LF":{ "label":"Temp Left" , "values":[], "model":objFrontSensor },
-                "T12_CNV_FR":{ "label":"Temp Right" , "values":[], "model":objLeftSensor }
+                "T11_CNV_LF":{ "label":"Left" , "values":[], "model":objFrontSensor },
+                "T42_CNV_RT":{ "label":"Right" , "values":[], "model":objFrontSensor },
+                "T12_CNV_FR":{ "label":"Front" , "values":[], "model":objLeftSensor },
+                "T13_CNV_BK":{ "label":"Back" , "values":[], "model":objBackSensor },
+                "T14_CNV_BT":{ "label":"Bottom" , "values":[], "model":objFrontSensor },
+                "T41_CNV_TP":{ "label":"Top" , "values":[], "model":objBackSensor },
+                "T31_RAD_BL":{ "label":"Black" , "values":[], "model":objLeftSensor },
+                "T32_RAD_WH":{ "label":"White" , "values":[], "model":objBackSensor },
+                "T33_CASE1":{ "label":"Case 1" , "values":[], "model":objFrontSensor },
+                "T34_CASE2":{ "label":"Case 2" , "values":[], "model":objLeftSensor },
+                "T43_CND_BR":{ "label":"Conduction 1" , "values":[], "model":objLeftSensor },
+                "T44_CND_CO":{ "label":"Conduction 2" , "values":[], "model":objBackSensor }
             }
         }
     },
     created(){},
     "methods":{
+        fnReset(){
+            clearInterval(objStream);
+            this.intRecords=0
+            var arrKeys=Object.keys(this.objConfig);
+            for(var i=0;i<arrKeys.length;i++){
+                this.objConfig[arrKeys[i]].values=[];
+            }
+        },
         fnUpdateColor(strId,intValue){
             /*
         - BLACK: <70F
@@ -268,6 +281,7 @@ new Vue({
             var self=this;
             var arrKeys = Object.keys(objData);
             //separate each value into its own little array for a chart
+            var intTimeStamp = Date.now();
             for( var i=0;i<arrKeys.length;i++ ){
                 if(typeof self.objConfig[arrKeys[i]] !== 'undefined'){ 
                     var intValue = parseInt(objData[arrKeys[i]]);
@@ -275,7 +289,8 @@ new Vue({
                     if(intValue > self.intMax){ self.intMax=intValue; }
                     else if(intValue < self.intMin){ self.intMin=intValue; }
                     //add data to charts
-                    self.objConfig[arrKeys[i]].values.push(parseInt(objData[arrKeys[i]]));
+                    var arrDataPoint=[ parseInt(objData[arrKeys[0]]), parseInt(objData[arrKeys[i]])];
+                    self.objConfig[arrKeys[i]].values.push(arrDataPoint);
                     //set color 
                     self.fnUpdateColor(arrKeys[i],intValue);
                     //update record count
@@ -292,12 +307,27 @@ new Vue({
                     //file loaded, start the stream, 1 per second
                     var arrData=objResults.data;
                     var intCount=arrData.length; var i=0;
-                    var objInterval=setInterval(function(){ 
+                    for(var i=0;i<intCount;i++){
+                        self.fnAddData(arrData[i]);
+                    }
+                    var arrKeys=Object.keys(self.objConfig);
+                    for(var i=0;i<arrKeys.length;i++){
+                        self.objChartData.push({"name":self.objConfig[arrKeys[i]].label, "data":self.objConfig[arrKeys[i]].values });
+                    }
+                    console.log(self.objChartData);
+                    /*
+                    objStream=setInterval(function(){ 
                         if(i<intCount){ self.fnAddData(arrData[i]); i++;}
-                        else{ clearInterval(objInterval); }
+                        else{ clearInterval(objStream); }
                     }, 1000);
+                    */
                 }
             });
+        },fnGetColor(intStart,hexStart,intEnd,hexEnd,intValue){
+            //take the begin and end of range with colors, calc the inbetween given a value
+            //find the range/diff between values, this is the full rnage for the color transition
+            var intRange = intEnd-intStart;
+
         }
     }
 });

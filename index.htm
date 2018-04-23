@@ -5,19 +5,25 @@
 		<title>Satellite Data</title>
 		<style>
 			body { margin: 0; overflow:hidden; color:#aaa;}
-			canvas { width: 100%; height: 100% }
-			#sparklines { position:absolute; z-index: 10; left:5; top:5px;}
+			#sparklines { position:absolute; z-index: 10; left:5; bottom:5px; width:100%;}
+			.tempChart{border:1px solid #333; height:100px;}
 		</style>
-		<script src=//unpkg.com/vue></script>
-		<script src=//unpkg.com/vuetrend></script>
+		<script src="./node_modules/vue/dist/vue.min.js"></script>
+		<script src="./node_modules/moment/moment.js"></script>
+		<script src="./node_modules/chart.js/dist/Chart.min.js"></script>
+		<script src="./node_modules/vue-chartkick/dist/vue-chartkick.min.js"></script>
 	</head>
 	<body>
 		<div id="sparklines" >
+		  <span v-if="intRecords === 0" > Load a File</span><span v-if="intRecords > 0" > Add a File</span> : 
 		  <input type="file" id="csv-file" name="files" @change="fnLoadFile" />
+		  <button v-if="intRecords > 0" @click="fnReset" >Reset Data</button>
 		  <!--  https://github.com/QingWei-Li/vue-trend  -->
 		  	<div v-if="intRecords > 0">
+		  		<!--
 		  		<div> {{intRecords}} Seconds</div>
-			  	<div v-for="objSensor in objConfig">
+			  	
+			  	<div v-for="objSensor in objConfig" class="tempChart">
 				  {{objSensor.label}}
 				  <trend
 				    :data=objSensor.values
@@ -29,11 +35,15 @@
 				  </trend>
 				  {{objSensor.values[objSensor.values.length-1]}}
 				</div>
+			-->
 			</div>
+			<line-chart :data="objChartData" :legend="true" suffix="°" :curve="false" :min="90" height="200px" style="width:100%"></line-chart>
 		</div>
+		
 		<script src="./node_modules/papaparse/papaparse.min.js"></script>
 		<script src="./node_modules/three/build/three.min.js"></script>
 		<script src="./node_modules/three/examples/js/loaders/STLLoader.js"></script>
+		<script src="./node_modules/three/examples/js/controls/OrbitControls.js"></script>
 		<script src="./js/index.js"></script>
 	</body>
 </html>
