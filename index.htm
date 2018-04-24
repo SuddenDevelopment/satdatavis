@@ -4,9 +4,10 @@
 		<meta charset=utf-8>
 		<title>Satellite Data</title>
 		<style>
-			body { margin: 0; overflow:hidden; color:#aaa;}
+			body { margin: 0; overflow:hidden; color:#aaa; background:#000;}
 			#sparklines { position:absolute; z-index: 10; left:5; bottom:5px; width:100%;}
 			.tempChart{border:1px solid #333; height:100px;}
+			#logo{ position:absolute; z-index: 10; top:0; left:0; width:300px; }
 		</style>
 		<script src="./node_modules/vue/dist/vue.min.js"></script>
 		<script src="./node_modules/moment/moment.js"></script>
@@ -14,6 +15,7 @@
 		<script src="./node_modules/vue-chartkick/dist/vue-chartkick.min.js"></script>
 	</head>
 	<body>
+		<img id="logo" src="./img/logo.png">
 		<div id="sparklines" >
 		  <span v-if="intRecords === 0" > Load a File</span><span v-if="intRecords > 0" > Add a File</span> : 
 		  <input type="file" id="csv-file" name="files" @change="fnLoadFile" />
@@ -37,7 +39,7 @@
 				</div>
 			-->
 			</div>
-			<line-chart :data="objChartData" :legend="true" suffix="°" :curve="false" :min="90" height="200px" style="width:100%"></line-chart>
+			<line-chart :data="objChartData" :legend="true" suffix="°" :curve="false" :min="95" height="400px" style="width:100%"></line-chart>
 		</div>
 		
 		<script src="./node_modules/papaparse/papaparse.min.js"></script>

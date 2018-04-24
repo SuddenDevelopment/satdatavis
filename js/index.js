@@ -10,10 +10,12 @@ var container, stats ,objFan1,objFan2,arrData,objStream;
             function init() {
 
                 container = document.createElement( 'div' );
+                container.id="model";
                 document.body.appendChild( container );
 
                 camera = new THREE.PerspectiveCamera( 35, window.innerWidth / window.innerHeight, 1, 15 );
                 camera.position.set( 0, 2, 2 );
+
 
                 cameraTarget = new THREE.Vector3( 0, 0.5, 0 );
                 controls = new THREE.OrbitControls( camera );
@@ -116,29 +118,55 @@ var container, stats ,objFan1,objFan2,arrData,objStream;
                 objTopSensor.position.set( -0.05, 0.95, -0.05 );
                 scene.add( objTopSensor );
 
+                objCase1Sensor = new THREE.Mesh( geometry, new THREE.MeshPhongMaterial( { color: 0x66AA66, specular: 0x111111, shininess: 200 } ) );
+                objCase1Sensor.position.set( -0.3, 1.1, 0.3 );
+                scene.add( objCase1Sensor );
+
                 objBotSensor = new THREE.Mesh( geometry, new THREE.MeshPhongMaterial( { color: 0x66AA66, specular: 0x111111, shininess: 200 } ) );
                 objBotSensor.position.set( -0.05, 0.35, -0.05 );
                 scene.add( objBotSensor );
 
-                objLeftSensor = new THREE.Mesh( geometry, new THREE.MeshPhongMaterial( { color: 0x66AA66, specular: 0x111111, shininess: 200 } ) );
-                objLeftSensor.rotation.set(0,0,Math.PI/2);
-                objLeftSensor.position.set( -0.45, 0.65, -0.05 );
-                scene.add( objLeftSensor );
+                objCase2Sensor = new THREE.Mesh( geometry, new THREE.MeshPhongMaterial( { color: 0x66AA66, specular: 0x111111, shininess: 200 } ) );
+                objCase2Sensor.position.set( 0.4, 0.35, 0 );
+                scene.add( objCase2Sensor );
 
-                objRightSensor = new THREE.Mesh( geometry, new THREE.MeshPhongMaterial( { color: 0x66AA66, specular: 0x111111, shininess: 200 } ) );
-                objRightSensor.rotation.set(0,0,Math.PI/2);
-                objRightSensor.position.set( 0.3, 0.65, -0.05 );
-                scene.add( objRightSensor );
+                objBlackSensor = new THREE.Mesh( geometry, new THREE.MeshPhongMaterial( { color: 0x66AA66, specular: 0x111111, shininess: 200 } ) );
+                objBlackSensor.position.set( 0.25, 0.35, -0.4 );
+                scene.add( objBlackSensor );
 
-                objFrontSensor = new THREE.Mesh( geometry, new THREE.MeshPhongMaterial( { color: 0x66AA66, specular: 0x111111, shininess: 200 } ) );
-                objFrontSensor.rotation.set(Math.PI/2,0,0);
-                objFrontSensor.position.set( -0.05, 0.65, -0.45 );
-                scene.add( objFrontSensor );
+                objWhiteSensor = new THREE.Mesh( geometry, new THREE.MeshPhongMaterial( { color: 0x66AA66, specular: 0x111111, shininess: 200 } ) );
+                objWhiteSensor.position.set( 0.1, 0.35, -0.4 );
+                scene.add( objWhiteSensor );
 
                 objBackSensor = new THREE.Mesh( geometry, new THREE.MeshPhongMaterial( { color: 0x66AA66, specular: 0x111111, shininess: 200 } ) );
-                objBackSensor.rotation.set(Math.PI/2,0,0);
-                objBackSensor.position.set( -0.05, 0.65, 0.4 );
+                objBackSensor.rotation.set(0,0,Math.PI/2);
+                objBackSensor.position.set( -0.475, 0.65, -0.05 );
                 scene.add( objBackSensor );
+
+                objFrontSensor = new THREE.Mesh( geometry, new THREE.MeshPhongMaterial( { color: 0x66AA66, specular: 0x111111, shininess: 200 } ) );
+                objFrontSensor.rotation.set(0,0,Math.PI/2);
+                objFrontSensor.position.set( 0.3, 0.65, -0.05 );
+                scene.add( objFrontSensor );
+
+                objRightSensor = new THREE.Mesh( geometry, new THREE.MeshPhongMaterial( { color: 0x66AA66, specular: 0x111111, shininess: 200 } ) );
+                objRightSensor.rotation.set(Math.PI/2,0,0);
+                objRightSensor.position.set( -0.05, 0.65, -0.48 );
+                scene.add( objRightSensor );
+
+                objLeftSensor = new THREE.Mesh( geometry, new THREE.MeshPhongMaterial( { color: 0x66AA66, specular: 0x111111, shininess: 200 } ) );
+                objLeftSensor.rotation.set(Math.PI/2,0,0);
+                objLeftSensor.position.set( -0.05, 0.65, 0.425 );
+                scene.add( objLeftSensor );
+
+                objCSensor1 = new THREE.Mesh( geometry, new THREE.MeshPhongMaterial( { color: 0x66AA66, specular: 0x111111, shininess: 200 } ) );
+                objCSensor1.rotation.set(Math.PI/2,0,0);
+                objCSensor1.position.set( -0.16, 0.855, -0.48 );
+                scene.add( objCSensor1 );
+
+                objCSensor2 = new THREE.Mesh( geometry, new THREE.MeshPhongMaterial( { color: 0x66AA66, specular: 0x111111, shininess: 200 } ) );
+                objCSensor2.rotation.set(Math.PI/2,0,0);
+                objCSensor2.position.set( -0.35, 0.855, -0.48 );
+                scene.add( objCSensor2 );
 
                 // Lights
 var bulbGeometry = new THREE.SphereGeometry( 0.02, 16, 8 );
@@ -149,12 +177,9 @@ var bulbGeometry = new THREE.SphereGeometry( 0.02, 16, 8 );
                     color: 0x000000
                 });
                 bulbLight.add( new THREE.Mesh( bulbGeometry, bulbMat ) );
-                bulbLight.position.set( -0.4, 0.5, -0.48 );
+                bulbLight.position.set( 0.2, 0.65, -0.48 );
                 bulbLight.castShadow = true;
                 scene.add( bulbLight );
-
-
-
 
                 scene.add( new THREE.HemisphereLight( 0x443333, 0x111122 ) );
 
@@ -194,9 +219,9 @@ var bulbGeometry = new THREE.SphereGeometry( 0.02, 16, 8 );
             }
 
             function animate() {
-
                 requestAnimationFrame( animate );
                 controls.update();
+                
                 render();
                 //stats.update();
 
@@ -231,18 +256,18 @@ new Vue({
         return {
             "intMin":90, "intMax":100, "intRecords":0, "objChartData":[],
             "objConfig":{
-                "T11_CNV_LF":{ "label":"Left" , "values":[], "model":objFrontSensor },
-                "T42_CNV_RT":{ "label":"Right" , "values":[], "model":objFrontSensor },
-                "T12_CNV_FR":{ "label":"Front" , "values":[], "model":objLeftSensor },
+                "T11_CNV_LF":{ "label":"Left" , "values":[], "model":objLeftSensor },
+                "T42_CNV_RT":{ "label":"Right" , "values":[], "model":objRightSensor },
+                "T12_CNV_FR":{ "label":"Front" , "values":[], "model":objFrontSensor },
                 "T13_CNV_BK":{ "label":"Back" , "values":[], "model":objBackSensor },
-                "T14_CNV_BT":{ "label":"Bottom" , "values":[], "model":objFrontSensor },
-                "T41_CNV_TP":{ "label":"Top" , "values":[], "model":objBackSensor },
-                "T31_RAD_BL":{ "label":"Black" , "values":[], "model":objLeftSensor },
-                "T32_RAD_WH":{ "label":"White" , "values":[], "model":objBackSensor },
-                "T33_CASE1":{ "label":"Case 1" , "values":[], "model":objFrontSensor },
-                "T34_CASE2":{ "label":"Case 2" , "values":[], "model":objLeftSensor },
-                "T43_CND_BR":{ "label":"Conduction 1" , "values":[], "model":objLeftSensor },
-                "T44_CND_CO":{ "label":"Conduction 2" , "values":[], "model":objBackSensor }
+                "T14_CNV_BT":{ "label":"Bottom" , "values":[], "model":objBotSensor },
+                "T41_CNV_TP":{ "label":"Top" , "values":[], "model":objTopSensor },
+                "T31_RAD_BL":{ "label":"Black" , "values":[], "model":objBlackSensor },
+                "T32_RAD_WH":{ "label":"White" , "values":[], "model":objWhiteSensor },
+                "T33_CASE1":{ "label":"Case 1" , "values":[], "model":objCase1Sensor },
+                "T34_CASE2":{ "label":"Case 2" , "values":[], "model":objCase2Sensor },
+                "T43_CND_BR":{ "label":"Conduction 1" , "values":[], "model":objCSensor1 },
+                "T44_CND_CO":{ "label":"Conduction 2" , "values":[], "model":objCSensor2 }
             }
         }
     },

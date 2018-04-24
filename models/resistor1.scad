@@ -1,7 +1,7 @@
 intX=82.55;
 cube([10,30,10]);
-translate([0,5,5])cube([intX,1,1]);
-translate([0,25,5])cube([intX,1,1]);
+translate([10,5,5])cube([intX,1,1]);
+translate([10,25,5])cube([intX,1,1]);
 
 translate([0,0,5])difference(){
         intersection(){
