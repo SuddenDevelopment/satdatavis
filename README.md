@@ -1,6 +1,8 @@
 # satdatavis
 explore visualizing satellite project data
 
+![](spacevis.png)
+
 ## pre requisites
 1. npm
 2. a web server. You can run a light weight webserver called http-server if needed
