@@ -7,74 +7,56 @@ var camera, cameraTarget, scene, renderer, controls, objRes1, objRes2,material;
             animate();
 
             function init() {
-
+                //this id is already in the html, just find it
                 container = document.getElementById( 'model' );
-
+                //add the camera
                 camera = new THREE.PerspectiveCamera( 35, window.innerWidth / (window.innerHeight/2), 1, 15 );
                 camera.position.set( 0, 2, 2 );
-
                 cameraTarget = new THREE.Vector3( 0, 0.5, 0 );
                 controls = new THREE.OrbitControls( camera );
                 scene = new THREE.Scene();
-                //scene.background = new THREE.Color( 0x72645b );
-                //scene.fog = new THREE.Fog( 0x72645b, 2, 15 );
-
 
                 var loader = new THREE.STLLoader();
 
                 material = new THREE.MeshPhongMaterial( { color: 0xAAAAAA, specular: 0x111111, shininess: 200 } );
 
+                //this is the model that outlines the edges of the box
                 loader.load( './models/box.stl', function ( geometry ) {
-
                     var meshMaterial = material;
                     if (geometry.hasColors) {
                         meshMaterial = new THREE.MeshPhongMaterial({ transparent:true, opacity: 0.5, vertexColors: THREE.VertexColors });
                     }
-
                     objBox = new THREE.Mesh( geometry, meshMaterial );
-
                     objBox.position.set( -0.5, 1, -0.5 );
                     objBox.rotation.set( Math.PI / 2, 0, 0 );
                     objBox.scale.set( 0.01, 0.01, 0.01 );
-
                     scene.add( objBox );
-
                 } );
 
 
                 loader.load( './models/fan.stl', function ( geometry ) {
-
                     var meshMaterial = material;
                     if (geometry.hasColors) {
                         meshMaterial = new THREE.MeshPhongMaterial({ transparent:true, opacity: 0.5, vertexColors: THREE.VertexColors });
-                        //var material = new THREE.MeshPhongMaterial ({ color: 0xFF0000, opacity: 0.2, transparent: true });
-
                     }
-
                     objFan2 = new THREE.Mesh( geometry, meshMaterial );
-
                     objFan2.position.set( -0.3, 1, -0.3 );
                     objFan2.rotation.set( 0, Math.PI / 2, 0 );
                     objFan2.scale.set( 0.01, 0.01, 0.01 );
-
                     scene.add( objFan2 );
 
                 } );
-                loader.load( './models/fan.stl', function ( geometry ) {
 
+                loader.load( './models/fan.stl', function ( geometry ) {
                     var meshMaterial = material;
                     if (geometry.hasColors) {
                         meshMaterial = new THREE.MeshPhongMaterial({ transparent:true, opacity: 0.5, vertexColors: THREE.VertexColors });
                     }
-
                     objFan1 = new THREE.Mesh( geometry, meshMaterial );
-
                     objFan1.position.set( 0.15, 1, 0.25 );
                     objFan1.rotation.set( 0, Math.PI / 2, 0 );
                     objFan1.scale.set( 0.01, 0.01, 0.01 );
-
                     scene.add( objFan1 );
-
                 } );
 
                 loader.load( './models/resistor2.stl', function ( geometry ) {
@@ -176,67 +158,45 @@ var camera, cameraTarget, scene, renderer, controls, objRes1, objRes2,material;
 
                 scene.add( new THREE.HemisphereLight( 0x443333, 0x111122 ) );
 
-               // addShadowedLight( 1, 1, 1, 0xffffff, 1.35 );
-                //addShadowedLight( 0.5, 1, -1, 0xffaa00, 1 );
-                // renderer
-
                 renderer = new THREE.WebGLRenderer( { antialias: true } );
                 renderer.setPixelRatio( window.devicePixelRatio );
                 renderer.setSize( window.innerWidth, window.innerHeight/2 );
-
                 renderer.gammaInput = true;
                 renderer.gammaOutput = true;
-
                 renderer.shadowMap.enabled = true;
 
                 container.appendChild( renderer.domElement );
-
-                // stats
-
-                //stats = new Stats();
-                //container.appendChild( stats.dom );
-
-                //
 
                 window.addEventListener( 'resize', onWindowResize, false );
 
             }
 
             function onWindowResize() {
-
                 camera.aspect = window.innerWidth / (window.innerHeight/2);
                 camera.updateProjectionMatrix();
-
                 renderer.setSize( window.innerWidth, (window.innerHeight/2) );
-
             }
 
             function animate() {
                 requestAnimationFrame( animate );
-                controls.update();
-                
+                controls.update();                
                 render();
-                //stats.update();
-
             }
 
             function render() {
-
                 var timer = Date.now() * 0.0005;
                 if(objFan1){ objFan1.rotation.set( Math.PI/2, 0, objFan1.rotation.z+=1 ); }
                 if(objFan2){ objFan2.rotation.set( Math.PI/2, 0, objFan2.rotation.z-=1); }
                 
-
+                //uncomment for rotation
                 //camera.position.x = Math.cos( timer ) * 3;
                 //camera.position.z = Math.sin( timer ) * 3;
                 camera.lookAt( cameraTarget );
-
                 renderer.render( scene, camera );
-
             }
 
 var fnAddData=function(objData){
-    console.log(objData);
+    //console.log(objData);
     if(objData.T11_CNV_LF > 100){ objLeftSensor.material.color = new THREE.Color(0xFF3333); }
     if(objData.T11_CNV_LF < 100){ objLeftSensor.material.color = new THREE.Color(0x333333); }
 };
@@ -247,6 +207,7 @@ new Vue({
     "el": '#sparklines',
     "components": { },
     data(){
+        // a lot is driven from the config arrays/ objects before. grouping of sensors, mapping of lables to objects, and placeholder for the data arrays
         return {
             "intMin":90, "intMax":100, "intRecords":0, "arrChartData":[],
             "objConfig":{
@@ -284,9 +245,13 @@ new Vue({
                     var objModel={};
                     var arrKeys=Object.keys(self.objConfig);
                     for(var i=0; i<arrKeys.length;i++){
-                        if(self.objConfig[arrKeys[i]].label === strLabel){ strId=arrKeys[i] ;objModel=self.objConfig[arrKeys[i]].model; }
+                        if(self.objConfig[arrKeys[i]].label === strLabel){ 
+                            //found the object we were looking for, the objConfig that matches the legend item clicked
+                            strId=arrKeys[i] ;objModel=self.objConfig[arrKeys[i]].model; 
+                        }
                     }
                     if(objModel.material.color.r===0.3 && objModel.material.color.g===0.3 && objModel.material.color.b===0.3){
+                        //this one is already grey
                         self.fnUpdateColor(strId,self.objConfig[strId].values[self.objConfig[strId].values.length-1]);
                     }else{ objModel.material.color={r:0.3,g:0.3,b:0.3}; }
                 }
