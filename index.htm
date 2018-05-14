@@ -3,45 +3,39 @@
 	<head>
 		<meta charset=utf-8>
 		<title>Satellite Data</title>
+		<link href="./node_modules/c3/c3.css" rel="stylesheet">
 		<style>
 			body { margin: 0; overflow:hidden; color:#aaa; background:#000;}
-			#sparklines { position:absolute; z-index: 10; left:5; bottom:5px; width:100%;}
 			.tempChart{border:1px solid #333; height:100px;}
 			#logo{ position:absolute; z-index: 10; top:0; left:0; width:300px; }
+			#model{ height:50%; }
+			#chart{ height:50%; }
+			.c3-axis,.c3-legend-item { fill:#A07F47; }
+			.c3-axis line, .c3-axis .domain{ stroke:#A07F47; }
+			#sparklines{ position:absolute; bottom:10px; z-index: 10; left:10px;}
+			#buttons{ display:inline; }
+			#buttons button{margin-right:20px;}
+			/* #buttons{ position:absolute; top:110px; left:20px; z-index: 10; } */
 		</style>
 		<script src="./node_modules/vue/dist/vue.min.js"></script>
 		<script src="./node_modules/moment/moment.js"></script>
-		<script src="./node_modules/chart.js/dist/Chart.min.js"></script>
-		<script src="./node_modules/vue-chartkick/dist/vue-chartkick.min.js"></script>
+		<script src="./node_modules/d3/dist/d3.min.js" charset="utf-8"></script>
+		<script src="./node_modules/c3/c3.min.js"></script>
 	</head>
 	<body>
 		<img id="logo" src="./img/logo.png">
+		<div id="model"></div>
+		<div id="chart"></div>
 		<div id="sparklines" >
 		  <span v-if="intRecords === 0" > Load a File</span><span v-if="intRecords > 0" > Add a File</span> : 
 		  <input type="file" id="csv-file" name="files" @change="fnLoadFile" />
-		  <button v-if="intRecords > 0" @click="fnReset" >Reset Data</button>
-		  <!--  https://github.com/QingWei-Li/vue-trend  -->
+		  <button v-show="intRecords > 0" @click="fnReset" >Reset Data</button>
 		  	<div v-if="intRecords > 0">
-		  		<!--
-		  		<div> {{intRecords}} Seconds</div>
-			  	
-			  	<div v-for="objSensor in objConfig" class="tempChart">
-				  {{objSensor.label}}
-				  <trend
-				    :data=objSensor.values
-				    :gradient="['#000', '#f0f', '#00f', '#ff0', '#f00']"
-				    :min=intMin
-				    :max=intMax
-				    auto-draw
-				    >
-				  </trend>
-				  {{objSensor.values[objSensor.values.length-1]}}
-				</div>
-			-->
 			</div>
-			<line-chart :data="objChartData" :legend="true" suffix="°" :curve="false" :min="95" height="400px" style="width:100%"></line-chart>
+			<div id="buttons">
+				<button v-for="(objBtn,index) in arrButtons" @click="fnFilter(index)">{{objBtn.label}}</button>
+			</div>		
 		</div>
-		
 		<script src="./node_modules/papaparse/papaparse.min.js"></script>
 		<script src="./node_modules/three/build/three.min.js"></script>
 		<script src="./node_modules/three/examples/js/loaders/STLLoader.js"></script>

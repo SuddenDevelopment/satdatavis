@@ -1,21 +1,17 @@
 // The dimensions are: 2.5" H x 3.25" Deep x 3.75" W
 // 63.5, 82.55, 95.25
 var container, stats ,objFan1,objFan2,arrData,objStream;
-
-            var camera, cameraTarget, scene, renderer,controls;
+var camera, cameraTarget, scene, renderer, controls, objRes1, objRes2,material;
 
             init();
             animate();
 
             function init() {
 
-                container = document.createElement( 'div' );
-                container.id="model";
-                document.body.appendChild( container );
+                container = document.getElementById( 'model' );
 
-                camera = new THREE.PerspectiveCamera( 35, window.innerWidth / window.innerHeight, 1, 15 );
+                camera = new THREE.PerspectiveCamera( 35, window.innerWidth / (window.innerHeight/2), 1, 15 );
                 camera.position.set( 0, 2, 2 );
-
 
                 cameraTarget = new THREE.Vector3( 0, 0.5, 0 );
                 controls = new THREE.OrbitControls( camera );
@@ -26,15 +22,13 @@ var container, stats ,objFan1,objFan2,arrData,objStream;
 
                 var loader = new THREE.STLLoader();
 
-                var material = new THREE.MeshPhongMaterial( { color: 0xAAAAAA, specular: 0x111111, shininess: 200 } );
+                material = new THREE.MeshPhongMaterial( { color: 0xAAAAAA, specular: 0x111111, shininess: 200 } );
 
                 loader.load( './models/box.stl', function ( geometry ) {
 
                     var meshMaterial = material;
                     if (geometry.hasColors) {
                         meshMaterial = new THREE.MeshPhongMaterial({ transparent:true, opacity: 0.5, vertexColors: THREE.VertexColors });
-                        //var material = new THREE.MeshPhongMaterial ({ color: 0xFF0000, opacity: 0.2, transparent: true });
-
                     }
 
                     objBox = new THREE.Mesh( geometry, meshMaterial );
@@ -169,12 +163,11 @@ var container, stats ,objFan1,objFan2,arrData,objStream;
                 scene.add( objCSensor2 );
 
                 // Lights
-var bulbGeometry = new THREE.SphereGeometry( 0.02, 16, 8 );
-                bulbLight = new THREE.PointLight( 0xffee88, 1, 100, 2 );
+                var bulbGeometry = new THREE.SphereGeometry( 0.02, 16, 8 );
+                bulbLight = new THREE.PointLight( 0xffffff, 1, 100, 2 );
                 bulbMat = new THREE.MeshStandardMaterial( {
-                    emissive: 0xffffee,
-                    emissiveIntensity: 1,
-                    color: 0x000000
+                    emissive: 0xffffff,
+                    emissiveIntensity: 1
                 });
                 bulbLight.add( new THREE.Mesh( bulbGeometry, bulbMat ) );
                 bulbLight.position.set( 0.2, 0.65, -0.48 );
@@ -189,7 +182,7 @@ var bulbGeometry = new THREE.SphereGeometry( 0.02, 16, 8 );
 
                 renderer = new THREE.WebGLRenderer( { antialias: true } );
                 renderer.setPixelRatio( window.devicePixelRatio );
-                renderer.setSize( window.innerWidth, window.innerHeight );
+                renderer.setSize( window.innerWidth, window.innerHeight/2 );
 
                 renderer.gammaInput = true;
                 renderer.gammaOutput = true;
@@ -211,10 +204,10 @@ var bulbGeometry = new THREE.SphereGeometry( 0.02, 16, 8 );
 
             function onWindowResize() {
 
-                camera.aspect = window.innerWidth / window.innerHeight;
+                camera.aspect = window.innerWidth / (window.innerHeight/2);
                 camera.updateProjectionMatrix();
 
-                renderer.setSize( window.innerWidth, window.innerHeight );
+                renderer.setSize( window.innerWidth, (window.innerHeight/2) );
 
             }
 
@@ -249,12 +242,13 @@ var fnAddData=function(objData){
 };
 
 // https://www.chartkick.com/vue
-Vue.use(VueChartkick, {adapter: Chart})
+
 new Vue({ 
     "el": '#sparklines',
+    "components": { },
     data(){
         return {
-            "intMin":90, "intMax":100, "intRecords":0, "objChartData":[],
+            "intMin":90, "intMax":100, "intRecords":0, "arrChartData":[],
             "objConfig":{
                 "T11_CNV_LF":{ "label":"Left" , "values":[], "model":objLeftSensor },
                 "T42_CNV_RT":{ "label":"Right" , "values":[], "model":objRightSensor },
@@ -268,11 +262,85 @@ new Vue({
                 "T34_CASE2":{ "label":"Case 2" , "values":[], "model":objCase2Sensor },
                 "T43_CND_BR":{ "label":"Conduction 1" , "values":[], "model":objCSensor1 },
                 "T44_CND_CO":{ "label":"Conduction 2" , "values":[], "model":objCSensor2 }
-            }
+            },"arrButtons":[
+                {"label":'Exp1',"sensors":['T31_RAD_BL','T32_RAD_WH','T33_CASE1','T34_CASE2'],"heater":'bulbLight',"selected":false},
+                {"label":'Exp2&3',"sensors":['T11_CNV_LF','T42_CNV_RT','T12_CNV_FR','T13_CNV_BK','T14_CNV_BT','T41_CNV_TP','T33_CASE1','T34_CASE2'],"heater":'objRes2',"selected":false},
+                {"label":'Exp4',"sensors":['T43_CND_BR','T44_CND_CO','T33_CASE1','T34_CASE2'],"heater":'objRes1',"selected":false}
+            ]
         }
     },
-    created(){},
+    created(){
+         var self=this;
+         // http://c3js.org/reference.html
+         // http://c3js.org/
+         this.chart = c3.generate({
+            bindto: '#chart',
+            data: { columns:[] },
+            legend: {
+              item: {
+                onclick: function (strLabel) { 
+                    //toggle the model color
+                    var strId='';
+                    var objModel={};
+                    var arrKeys=Object.keys(self.objConfig);
+                    for(var i=0; i<arrKeys.length;i++){
+                        if(self.objConfig[arrKeys[i]].label === strLabel){ strId=arrKeys[i] ;objModel=self.objConfig[arrKeys[i]].model; }
+                    }
+                    if(objModel.material.color.r===0.3 && objModel.material.color.g===0.3 && objModel.material.color.b===0.3){
+                        self.fnUpdateColor(strId,self.objConfig[strId].values[self.objConfig[strId].values.length-1]);
+                    }else{ objModel.material.color={r:0.3,g:0.3,b:0.3}; }
+                }
+              }
+            },
+            axis: {
+                y: { min: 95 }
+            },point: { show: false }
+        });
+    },
     "methods":{
+        fnFilter(intKey){
+            var self=this;
+            var arrShow=[];
+            var arrHide=[];
+            /*
+            Exp1=enables Black,White,Case1,Case2; 
+            Exp2&3=enables Top,Bot,Left,Right,Front,Back,Case1,Case2; 
+            Exp4=enables Brass,Copper,Case1,Case2.
+            - also if an Exp filter is set, we color the heating element red in the model 
+            (Exp1=bulb, Exp2&3=center resistor, Exp4=far resistor w/ 2 wires conn). 
+            If they unset the Exp filter or custom hide indiv settings, the heating elem goes back to orig color.
+            */
+            //hide all
+            var arrKeys=Object.keys(self.objConfig);
+            for(var i=0; i<arrKeys.length;i++){  
+                arrHide.push(self.objConfig[arrKeys[i]].label); 
+                //and grey out the sensors
+                self.objConfig[arrKeys[i]].model.material.color={r:0.3,g:0.3,b:0.3};
+            }
+            self.chart.hide(arrHide, {withLegend: true});
+            //console.log(arrHide);
+            //get the filter/button config
+            var objBtn=self.arrButtons[intKey];
+
+            for(var i=0;i<self.arrButtons[intKey].sensors.length;i++){ 
+                arrShow.push(self.objConfig[self.arrButtons[intKey].sensors[i]].label); 
+                //highlight the sensors
+                self.objConfig[self.arrButtons[intKey].sensors[i]].model.material.color={r:1,g:0,b:0};
+            }
+            //console.log(window['objRes1']);
+            //reset the heater colors:
+            objRes1.material.color={r:0.3,g:0.3,b:0.3}; objRes2.material.color={r:0.3,g:0.3,b:0.3}; bulbLight.children[0].material.emissive={r:1,g:1,b:1};
+
+            //must be lazy loaded because its not availabel until stlloaders complete, messy
+            var objHeater=window[self.arrButtons[intKey].heater];
+            //the pkintligh / bulb has a different color path
+            if(typeof objHeater.type !== 'undefined' && objHeater.type==='PointLight'){ 
+                objHeater.children[0].material.emissive={r:1,g:0,b:0}; 
+            }
+            else{ objHeater.material.color={r:1,g:0,b:0}; }
+            //and show them
+            self.chart.show(arrShow, {withLegend: true});
+        },
         fnReset(){
             clearInterval(objStream);
             this.intRecords=0
@@ -314,8 +382,8 @@ new Vue({
                     if(intValue > self.intMax){ self.intMax=intValue; }
                     else if(intValue < self.intMin){ self.intMin=intValue; }
                     //add data to charts
-                    var arrDataPoint=[ parseInt(objData[arrKeys[0]]), parseInt(objData[arrKeys[i]])];
-                    self.objConfig[arrKeys[i]].values.push(arrDataPoint);
+                    //var arrDataPoint=[ parseInt(objData[arrKeys[0]]), parseInt(objData[arrKeys[i]])];
+                    self.objConfig[arrKeys[i]].values.push(intValue);
                     //set color 
                     self.fnUpdateColor(arrKeys[i],intValue);
                     //update record count
@@ -324,28 +392,26 @@ new Vue({
                 //console.log(objData[arrKeys[i]],parseInt(objData[arrKeys[i]]));
             }
         },fnLoadFile(objEvent){
+            //this is what is called after a file is selected
             var self=this;
             Papa.parse(objEvent.target.files[0], {
                 "header": true,
                 "complete": function(objResults) {
-                    //console.log(objResults);
-                    //file loaded, start the stream, 1 per second
+                    //this fires after the file is loaded into memory by papaparse
                     var arrData=objResults.data;
                     var intCount=arrData.length; var i=0;
-                    for(var i=0;i<intCount;i++){
-                        self.fnAddData(arrData[i]);
-                    }
+                    //run this for each row/record
+                    for(var i=0;i<intCount;i++){ self.fnAddData(arrData[i]); }
                     var arrKeys=Object.keys(self.objConfig);
+                    //all records are loaded, now run through each of the series
                     for(var i=0;i<arrKeys.length;i++){
-                        self.objChartData.push({"name":self.objConfig[arrKeys[i]].label, "data":self.objConfig[arrKeys[i]].values });
+                        //put the series label at the beginning for C3
+                        self.objConfig[arrKeys[i]].values.unshift(self.objConfig[arrKeys[i]].label);
+                        //add it to the array of series data
+                        self.arrChartData.push(self.objConfig[arrKeys[i]].values);
                     }
-                    console.log(self.objChartData);
-                    /*
-                    objStream=setInterval(function(){ 
-                        if(i<intCount){ self.fnAddData(arrData[i]); i++;}
-                        else{ clearInterval(objStream); }
-                    }, 1000);
-                    */
+                    //load the data into the c3 chart
+                    self.chart.load({ columns: self.arrChartData });
                 }
             });
         },fnGetColor(intStart,hexStart,intEnd,hexEnd,intValue){
