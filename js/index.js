@@ -12,6 +12,8 @@ var camera, cameraTarget, scene, renderer, controls, objRes1, objRes2,material;
                 //add the camera
                 camera = new THREE.PerspectiveCamera( 35, window.innerWidth / (window.innerHeight/2), 1, 15 );
                 camera.position.set( 0, 2, 2 );
+                camera.position.x = Math.cos( 44 )*2;
+                camera.position.z = Math.sin( 44 )*2;
                 cameraTarget = new THREE.Vector3( 0, 0.5, 0 );
                 controls = new THREE.OrbitControls( camera );
                 scene = new THREE.Scene();
@@ -145,14 +147,14 @@ var camera, cameraTarget, scene, renderer, controls, objRes1, objRes2,material;
                 scene.add( objCSensor2 );
 
                 // Lights
-                var bulbGeometry = new THREE.SphereGeometry( 0.02, 16, 8 );
+                var bulbGeometry = new THREE.SphereGeometry( 0.04, 16, 8 );
                 bulbLight = new THREE.PointLight( 0xffffff, 1, 100, 2 );
                 bulbMat = new THREE.MeshStandardMaterial( {
                     emissive: 0xffffff,
                     emissiveIntensity: 1
                 });
                 bulbLight.add( new THREE.Mesh( bulbGeometry, bulbMat ) );
-                bulbLight.position.set( 0.2, 0.65, -0.48 );
+                bulbLight.position.set( 0.2, 0.65, -0.46 );
                 bulbLight.castShadow = true;
                 scene.add( bulbLight );
 
@@ -234,9 +236,12 @@ new Vue({
          var self=this;
          // http://c3js.org/reference.html
          // http://c3js.org/
-         this.chart = c3.generate({
+         self.chart = c3.generate({
             bindto: '#chart',
             data: { columns:[] },
+            color: {
+                pattern: ['#ff8888', '#8888ff', '#88ff88', '#ffff88', '#88ffff', '#ff88ff', '#ffbb88', '#ff88bb', '#bb88ff', '#88ffbb', '#bbff88', '#88bbff', '#ffbb88', '#f7b6d2', '#7f7f7f', '#c7c7c7', '#bcbd22', '#dbdb8d', '#17becf', '#9edae5']
+            },
             legend: {
               item: {
                 onclick: function (strLabel) { 
@@ -293,12 +298,23 @@ new Vue({
             var objBtn=self.arrButtons[intKey];
             objBtn.selected=true;
             for(var i=0;i<self.arrButtons[intKey].sensors.length;i++){ 
-                arrShow.push(self.objConfig[self.arrButtons[intKey].sensors[i]].label); 
+                //remove the defined sensors from the grey out filter list using KEYS
+                for(var ii=0;ii<arrKeys.length;ii++){
+                    if(arrKeys[ii]===self.arrButtons[intKey].sensors[i]){
+                        arrKeys.splice(ii,1);
+                    }
+                }
+                //arrShow.push(self.objConfig[self.arrButtons[intKey].sensors[i]].label); 
                 //highlight the sensors
-                self.objConfig[self.arrButtons[intKey].sensors[i]].model.material.color={r:1,g:0,b:0};
-                //remove from the hide array
+                //self.objConfig[self.arrButtons[intKey].sensors[i]].model.material.color={r:1,g:0,b:0};
+                
+                //remove from the hide array, using LABELS
                 var intIndex = arrHide.indexOf(self.objConfig[self.arrButtons[intKey].sensors[i]].label)
                 if(intIndex > -1){ arrHide.splice(intIndex,1); }
+            }
+            //grey out all sensors but ones being shown
+            for(var i=0;i<arrKeys.length;i++){
+                self.objConfig[arrKeys[i]].model.material.color={r:0.5,g:0.5,b:0.5};;
             }
 
             //must be lazy loaded because its not availabel until stlloaders complete, messy
@@ -316,12 +332,17 @@ new Vue({
             for(var i=0;i<self.arrButtons.length;i++){ self.arrButtons[i].selected=false; }
             //reset the heater colors:
             objRes1.material.color={r:0.3,g:0.3,b:0.3}; objRes2.material.color={r:0.3,g:0.3,b:0.3}; bulbLight.children[0].material.emissive={r:1,g:1,b:1};
+            //get the chart colors for sensors
+            var objColors=self.chart.data.colors();
+                    //sync all the colors
+                    var arrKeys=Object.keys(self.objConfig);
+                    for(var i=0;i<arrKeys.length;i++){
+                        self.objConfig[arrKeys[i]].model.material.color = new THREE.Color(objColors[self.objConfig[arrKeys[i]].label]);
+                        //console.log(self.objConfig[arrKeys[i]].label,objColors[self.objConfig[arrKeys[i]].label]);
+                    }
             var arrKeys=Object.keys(self.objConfig);
-            for(var i=0; i<arrKeys.length;i++){  
-                arrShow.push(self.objConfig[arrKeys[i]].label); 
-                //and grey out the sensors
-                self.objConfig[arrKeys[i]].model.material.color={r:0.3,g:0.3,b:0.3};
-            }
+            //show all chart data
+            for(var i=0; i<arrKeys.length;i++){ arrShow.push(self.objConfig[arrKeys[i]].label); }
             self.chart.show(arrShow, {withLegend: true});
         },
         fnUpdateColor(strId,intValue){
