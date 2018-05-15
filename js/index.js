@@ -209,7 +209,7 @@ new Vue({
     data(){
         // a lot is driven from the config arrays/ objects before. grouping of sensors, mapping of lables to objects, and placeholder for the data arrays
         return {
-            "intMin":90, "intMax":100, "intRecords":0, "arrChartData":[],
+            "intMin":90, "intMax":100, "intRecords":0, "arrChartData":[],"experiment":'',
             "objConfig":{
                 "T11_CNV_LF":{ "label":"Left" , "values":[], "model":objLeftSensor },
                 "T42_CNV_RT":{ "label":"Right" , "values":[], "model":objRightSensor },
@@ -276,6 +276,7 @@ new Vue({
             If they unset the Exp filter or custom hide indiv settings, the heating elem goes back to orig color.
             */
             //hide all
+            /*
             var arrKeys=Object.keys(self.objConfig);
             for(var i=0; i<arrKeys.length;i++){  
                 arrHide.push(self.objConfig[arrKeys[i]].label); 
@@ -283,36 +284,45 @@ new Vue({
                 self.objConfig[arrKeys[i]].model.material.color={r:0.3,g:0.3,b:0.3};
             }
             self.chart.hide(arrHide, {withLegend: true});
+            */
+            var arrKeys=Object.keys(self.objConfig);
+            for(var i=0; i<arrKeys.length;i++){ arrHide.push(self.objConfig[arrKeys[i]].label); }
+            self.fnReset();
             //console.log(arrHide);
             //get the filter/button config
             var objBtn=self.arrButtons[intKey];
-
+            objBtn.selected=true;
             for(var i=0;i<self.arrButtons[intKey].sensors.length;i++){ 
                 arrShow.push(self.objConfig[self.arrButtons[intKey].sensors[i]].label); 
                 //highlight the sensors
                 self.objConfig[self.arrButtons[intKey].sensors[i]].model.material.color={r:1,g:0,b:0};
+                //remove from the hide array
+                var intIndex = arrHide.indexOf(self.objConfig[self.arrButtons[intKey].sensors[i]].label)
+                if(intIndex > -1){ arrHide.splice(intIndex,1); }
             }
-            //console.log(window['objRes1']);
-            //reset the heater colors:
-            objRes1.material.color={r:0.3,g:0.3,b:0.3}; objRes2.material.color={r:0.3,g:0.3,b:0.3}; bulbLight.children[0].material.emissive={r:1,g:1,b:1};
 
             //must be lazy loaded because its not availabel until stlloaders complete, messy
             var objHeater=window[self.arrButtons[intKey].heater];
             //the pkintligh / bulb has a different color path
             if(typeof objHeater.type !== 'undefined' && objHeater.type==='PointLight'){ 
                 objHeater.children[0].material.emissive={r:1,g:0,b:0}; 
-            }
-            else{ objHeater.material.color={r:1,g:0,b:0}; }
+            }else{ objHeater.material.color={r:1,g:0,b:0}; }
             //and show them
-            self.chart.show(arrShow, {withLegend: true});
+            self.chart.hide(arrHide, {withLegend: true});
         },
         fnReset(){
-            clearInterval(objStream);
-            this.intRecords=0
-            var arrKeys=Object.keys(this.objConfig);
-            for(var i=0;i<arrKeys.length;i++){
-                this.objConfig[arrKeys[i]].values=[];
+            var self=this,arrShow=[];
+            //reset all the buttons
+            for(var i=0;i<self.arrButtons.length;i++){ self.arrButtons[i].selected=false; }
+            //reset the heater colors:
+            objRes1.material.color={r:0.3,g:0.3,b:0.3}; objRes2.material.color={r:0.3,g:0.3,b:0.3}; bulbLight.children[0].material.emissive={r:1,g:1,b:1};
+            var arrKeys=Object.keys(self.objConfig);
+            for(var i=0; i<arrKeys.length;i++){  
+                arrShow.push(self.objConfig[arrKeys[i]].label); 
+                //and grey out the sensors
+                self.objConfig[arrKeys[i]].model.material.color={r:0.3,g:0.3,b:0.3};
             }
+            self.chart.show(arrShow, {withLegend: true});
         },
         fnUpdateColor(strId,intValue){
             /*
@@ -359,6 +369,9 @@ new Vue({
         },fnLoadFile(objEvent){
             //this is what is called after a file is selected
             var self=this;
+            self.arrChartData=[];
+            //this is expecting Exp1 Exp2 etc
+            self.experiment = objEvent.target.files[0].name.substring(0, 4);
             Papa.parse(objEvent.target.files[0], {
                 "header": true,
                 "complete": function(objResults) {
@@ -377,6 +390,10 @@ new Vue({
                     }
                     //load the data into the c3 chart
                     self.chart.load({ columns: self.arrChartData });
+                    //set the filter
+                    if(self.experiment==='Exp1'){ self.fnFilter(0); }
+                    else if(self.experiment==='Exp2' || self.experiment==='Exp3'){ self.fnFilter(1); }
+                    else if(self.experiment==='Exp3'){ self.fnFilter(2); }
                 }
             });
         },fnGetColor(intStart,hexStart,intEnd,hexEnd,intValue){

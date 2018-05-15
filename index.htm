@@ -15,6 +15,7 @@
 			#sparklines{ position:absolute; bottom:10px; z-index: 10; left:10px;}
 			#buttons{ display:inline; }
 			#buttons button{margin-right:20px;}
+			#buttons button.active{ background:#A07F47; font-weight: bold; border:1px solid #000;}
 			/* #buttons{ position:absolute; top:110px; left:20px; z-index: 10; } */
 		</style>
 		<script src="./node_modules/vue/dist/vue.min.js"></script>
@@ -29,11 +30,11 @@
 		<div id="sparklines" >
 		  <span v-if="intRecords === 0" > Load a File</span><span v-if="intRecords > 0" > Add a File</span> : 
 		  <input type="file" id="csv-file" name="files" @change="fnLoadFile" />
-		  <button v-show="intRecords > 0" @click="fnReset" >Reset Data</button>
 		  	<div v-if="intRecords > 0">
 			</div>
 			<div id="buttons">
-				<button v-for="(objBtn,index) in arrButtons" @click="fnFilter(index)">{{objBtn.label}}</button>
+				<button v-for="(objBtn,index) in arrButtons" @click="fnFilter(index)" v-bind:class="{ 'active': objBtn.selected }">{{objBtn.label}}</button>
+				<button @click="fnReset" >Clear Filter</button>
 			</div>		
 		</div>
 		<script src="./node_modules/papaparse/papaparse.min.js"></script>
