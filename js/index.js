@@ -390,9 +390,19 @@ new Vue({
         },fnLoadFile(objEvent){
             //this is what is called after a file is selected
             var self=this;
+            //reset data in case this is a new file
             self.arrChartData=[];
+            self.chart.unload();
+            var arrKeys=Object.keys(self.objConfig);
+            for(var i=0;i<arrKeys.length;i++){ self.objConfig[arrKeys[i]].values=[]; }
             //this is expecting Exp1 Exp2 etc
-            self.experiment = objEvent.target.files[0].name.substring(0, 4);
+            if(objEvent.target.files[0].name.substring(0, 3)==='Exp'){
+                self.experiment = objEvent.target.files[0].name.substring(0, 4);
+            }else{
+                self.experiment = objEvent.target.files[0].name.substring(4, 8);
+            }
+            
+            
             Papa.parse(objEvent.target.files[0], {
                 "header": true,
                 "complete": function(objResults) {
@@ -414,7 +424,7 @@ new Vue({
                     //set the filter
                     if(self.experiment==='Exp1'){ self.fnFilter(0); }
                     else if(self.experiment==='Exp2' || self.experiment==='Exp3'){ self.fnFilter(1); }
-                    else if(self.experiment==='Exp3'){ self.fnFilter(2); }
+                    else if(self.experiment==='Exp4'){ self.fnFilter(2); }
                 }
             });
         },fnGetColor(intStart,hexStart,intEnd,hexEnd,intValue){
