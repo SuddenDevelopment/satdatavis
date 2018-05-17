@@ -396,12 +396,8 @@ new Vue({
             var arrKeys=Object.keys(self.objConfig);
             for(var i=0;i<arrKeys.length;i++){ self.objConfig[arrKeys[i]].values=[]; }
             //this is expecting Exp1 Exp2 etc
-            if(objEvent.target.files[0].name.substring(0, 3)==='Exp'){
-                self.experiment = objEvent.target.files[0].name.substring(0, 4);
-            }else{
-                self.experiment = objEvent.target.files[0].name.substring(4, 8);
-            }
-            
+            self.experiment=objEvent.target.files[0].name.match(/Exp\d/g)[0];
+            console.log(self.experiment);
             
             Papa.parse(objEvent.target.files[0], {
                 "header": true,
