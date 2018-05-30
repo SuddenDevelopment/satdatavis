@@ -236,36 +236,6 @@ new Vue({
          var self=this;
          // http://c3js.org/reference.html
          // http://c3js.org/
-         self.chart = c3.generate({
-            bindto: '#chart',
-            data: { columns:[] },
-            color: {
-                pattern: ['#ff8888', '#8888ff', '#88ff88', '#ffff88', '#88ffff', '#ff88ff', '#ffbb88', '#ff88bb', '#bb88ff', '#88ffbb', '#bbff88', '#88bbff', '#ffbb88', '#f7b6d2', '#7f7f7f', '#c7c7c7', '#bcbd22', '#dbdb8d', '#17becf', '#9edae5']
-            },
-            legend: {
-              item: {
-                onclick: function (strLabel) { 
-                    //toggle the model color
-                    var strId='';
-                    var objModel={};
-                    var arrKeys=Object.keys(self.objConfig);
-                    for(var i=0; i<arrKeys.length;i++){
-                        if(self.objConfig[arrKeys[i]].label === strLabel){ 
-                            //found the object we were looking for, the objConfig that matches the legend item clicked
-                            strId=arrKeys[i] ;objModel=self.objConfig[arrKeys[i]].model; 
-                        }
-                    }
-                    if(objModel.material.color.r===0.3 && objModel.material.color.g===0.3 && objModel.material.color.b===0.3){
-                        //this one is already grey
-                        self.fnUpdateColor(strId,self.objConfig[strId].values[self.objConfig[strId].values.length-1]);
-                    }else{ objModel.material.color={r:0.3,g:0.3,b:0.3}; }
-                }
-              }
-            },
-            axis: {
-                y: { min: 95 }
-            },point: { show: false }
-        });
     },
     "methods":{
         fnFilter(intKey){
@@ -392,7 +362,7 @@ new Vue({
             var self=this;
             //reset data in case this is a new file
             self.arrChartData=[];
-            self.chart.unload();
+            //self.chart.unload();
             var arrKeys=Object.keys(self.objConfig);
             for(var i=0;i<arrKeys.length;i++){ self.objConfig[arrKeys[i]].values=[]; }
             //this is expecting Exp1 Exp2 etc
@@ -415,6 +385,36 @@ new Vue({
                         //add it to the array of series data
                         self.arrChartData.push(self.objConfig[arrKeys[i]].values);
                     }
+                    self.chart = c3.generate({
+            bindto: '#chart',
+            data: { columns:[] },
+            color: {
+                pattern: ['#ff8888', '#8888ff', '#88ff88', '#ffff88', '#88ffff', '#ff88ff', '#ffbb88', '#ff88bb', '#bb88ff', '#88ffbb', '#bbff88', '#88bbff', '#ffbb88', '#f7b6d2', '#7f7f7f', '#c7c7c7', '#bcbd22', '#dbdb8d', '#17becf', '#9edae5']
+            },
+            legend: {
+              item: {
+                onclick: function (strLabel) { 
+                    //toggle the model color
+                    var strId='';
+                    var objModel={};
+                    var arrKeys=Object.keys(self.objConfig);
+                    for(var i=0; i<arrKeys.length;i++){
+                        if(self.objConfig[arrKeys[i]].label === strLabel){ 
+                            //found the object we were looking for, the objConfig that matches the legend item clicked
+                            strId=arrKeys[i] ;objModel=self.objConfig[arrKeys[i]].model; 
+                        }
+                    }
+                    if(objModel.material.color.r===0.3 && objModel.material.color.g===0.3 && objModel.material.color.b===0.3){
+                        //this one is already grey
+                        self.fnUpdateColor(strId,self.objConfig[strId].values[self.objConfig[strId].values.length-1]);
+                    }else{ objModel.material.color={r:0.3,g:0.3,b:0.3}; }
+                }
+              }
+            },
+            axis: {
+                y: { min: 95 }
+            },point: { show: false }
+        });
                     //load the data into the c3 chart
                     self.chart.load({ columns: self.arrChartData });
                     //set the filter
